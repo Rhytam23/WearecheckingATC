@@ -31,6 +31,13 @@ const App = {
         }).addTo(this.map);
 
         L.control.zoom({ position: 'topright' }).addTo(this.map);
+
+        // Add Scale Control (Metric & Imperial) - User Request
+        L.control.scale({
+            metric: true,
+            imperial: true,
+            position: 'bottomleft'
+        }).addTo(this.map);
     },
 
     initUI: function () {

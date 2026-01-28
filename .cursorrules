@@ -1,0 +1,32 @@
+# Project Rules
+
+## Tech Stack
+- **Frontend**: HTML5, Vanilla CSS, Vanilla JavaScript.
+- **Backend**: Node.js (Vanilla HTTP/HTTPS modules preferred, Express only if necessary).
+- **Mapping**: Leaflet.js with OpenStreetMap/CartoDB tiles.
+- **External APIs**: OpenSky Network (REST).
+
+## Security (CRITICAL)
+- **NO SECRETS IN CODE**: Never hardcode API credentials, passwords, or tokens in source files.
+- **Environment Variables**: Use `.env` for all sensitive data. Ensure `.env` is in `.gitignore`.
+- **Client-Side Safety**: `config.js` must NOT contain real credentials. It should be a template only. The server must handle authentication proxying.
+
+## Design System
+- **Theme**: Dark Mode (Aviation/Radar Aesthetic).
+- **Colors**:
+  - Background: `#1a1a1a` (Dark Grey)
+  - Panel Background: `rgba(20, 20, 20, 0.85)`
+  - Accent/Primary: `#00ffcc` (Cyan/Teal) - Used for user location, active elements, buttons.
+  - Warning/Idle: `#ffaa00` (Orange)
+  - Error: `#ff3333` (Red)
+- **Typography**: Monospace (`'Courier New', Courier, monospace`) for a technical, terminal-like feel.
+
+## Coding Standards
+- **Zero-Dependency Frontend**: Avoid bundling (Webpack/Vite) unless heavily requested. Keep it simple serve-able via `node server.js`.
+- **Comments**: Comment complex logic, especially geospatial calculations or API proxying.
+- **Linting**: No specific linter enforced, but keep indentation consistent (4 spaces).
+
+## Workflows
+- **Task Management**: Always update `task.md` before and after significant work units.
+- **Planning**: Always create/update `implementation_plan.md` before writing code for complex features.
+- **Verification**: Always verify changes by running the server (`node server.js`) or checking files.
