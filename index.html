@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local Airspace Visualizer</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <div id="map"></div>
+
+    <div id="ui-overlay">
+        <div class="control-panel">
+            <h1>Local Airspace</h1>
+
+            <!-- Radius Slider Removed via User Request (Viewport based now) -->
+
+            <div class="status-panel">
+                <div id="status-indicator" class="status-dot"></div>
+                <span id="status-text">Initializing...</span>
+                <span id="refresh-timer" style="margin-left: 5px; color: #555; font-size: 10px;"></span>
+                <span id="aircraft-count" style="margin-left: 10px; color: #ccc; font-weight: bold;"></span>
+            </div>
+
+            <button id="btn-locate-me"
+                style="margin-top: 10px; width: 100%; font-size: 11px; border-color: #00ffcc; color: #00ffcc;">📍 Locate
+                Me</button>
+            <button id="btn-login-open" style="margin-top: 5px; width: 100%; font-size: 11px;">Enable Fast Mode
+                (Login)</button>
+        </div>
+
+        <!-- Manual Location Modal -->
+        <div id="manual-location-modal" class="modal hidden">
+            <div class="modal-content">
+                <h2>Location Access</h2>
+                <p>Enter a city name to fly to (e.g., "Paris", "New York").</p>
+                <div class="input-group">
+                    <input type="text" id="manual-city" placeholder="City Name (e.g. Tokyo)">
+                </div>
+                <div class="button-group">
+                    <button id="btn-manual-submit">Search & Go</button>
+                    <button id="btn-use-default">Use London (Default)</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Login Modal -->
+        <div id="login-modal" class="modal hidden">
+            <div class="modal-content">
+                <h2>OpenSky Login</h2>
+                <p>Enter credentials to unlock 5s updates and higher rate limits.</p>
+                <div class="input-group" style="flex-direction: column;">
+                    <input type="text" id="api-username" placeholder="Website Username (Not Client ID)">
+                    <input type="password" id="api-password" placeholder="Website Password">
+                </div>
+                <p style="font-size: 10px; color: #ffaa00; margin-top: 0; margin-bottom: 10px;">
+                    Note: distinct from "Feeder" or "OAuth" credentials. Use your website login.
+                </p>
+                <div class="button-group">
+                    <button id="btn-login-submit">Save & Enable</button>
+                    <button id="btn-login-cancel"
+                        style="background: transparent; border: 1px solid #555;">Cancel</button>
+                </div>
+                <p style="font-size: 10px; color: #666; margin-top: 10px;">Credentials stored in functionality only. Not
+                    sent to any third party.</p>
+            </div>
+        </div>
+
+        <div id="altitude-legend">
+            <div class="legend-title">ALTITUDE (FT)</div>
+            <div class="legend-bar"></div>
+            <div class="legend-labels">
+                <span>GND</span>
+                <span>10k</span>
+                <span>20k</span>
+                <span>30k</span>
+                <span>40k+</span>
+            </div>
+        </div>
+
+        <div id="no-data-toast" class="toast hidden">No aircraft detected in this region.</div>
+    </div>
+
+    <!-- Details Side Panel -->
+    <div id="side-panel" class="side-panel hidden">
+        <div class="panel-header">
+            <h2 id="sp-callsign">N/A</h2>
+            <button id="btn-close-panel" class="close-icon">&times;</button>
+        </div>
+        <div class="panel-subheader">
+            <span id="sp-icao" class="mono">Hex: ----</span>
+            <span id="sp-country" class="tiny">Country: ----</span>
+        </div>
+
+        <div class="panel-content">
+            <!-- Spatial Section -->
+            <div class="section-header">SPATIAL</div>
+            <div class="data-row"><span>Groundspeed:</span> <span id="sp-speed" class="mono">--- kt</span></div>
+            <div class="data-row"><span>Baro. Altitude:</span> <span id="sp-alt" class="mono">--- ft</span></div>
+            <div class="data-row"><span>Geo. Altitude:</span> <span id="sp-geo-alt" class="mono">--- ft</span></div>
+            <div class="data-row"><span>Vert. Rate:</span> <span id="sp-vert" class="mono">--- ft/min</span></div>
+            <div class="data-row"><span>Track:</span> <span id="sp-track" class="mono">---°</span></div>
+            <div class="data-row"><span>Position:</span> <span id="sp-pos" class="mono">---, ---</span></div>
+
+            <!-- Signal Section -->
+            <div class="section-header">SIGNAL / INFO</div>
+            <div class="data-row"><span>Squawk:</span> <span id="sp-squawk" class="mono">----</span></div>
+            <div class="data-row"><span>Source:</span> <span id="sp-source" class="mono">---</span></div>
+            <div class="data-row"><span>Last Contact:</span> <span id="sp-seen" class="mono">--- s</span></div>
+
+            <div class="section-header">EXTERNAL</div>
+            <div style="text-align: center; margin-top: 10px;">
+                <a id="sp-link-fr24" href="#" target="_blank" class="ext-link">FlightRadar24</a>
+                <a id="sp-link-fa" href="#" target="_blank" class="ext-link">FlightAware</a>
+            </div>
+        </div>
+    </div>
+
+    <footer id="legal-footer">
+        <span>Data: <a href="https://opensky-network.org/" target="_blank">OpenSky Network</a> (Delayed)</span>
+        <span>Map: <a href="https://www.openstreetmap.org/" target="_blank">OSM</a></span>
+        <span class="warning">For educational use only. Not for navigation.</span>
+    </footer>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="js/config.js"></script>
+    <script src="js/aircraft_renderer.js"></script>
+    <script src="js/api_client.js"></script>
+    <script src="js/app.js"></script>
+</body>
+
+</html>

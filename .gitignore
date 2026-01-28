@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+
+# Environment variables and secrets
+.env
+credentials.json
+# Also ignore the config if it contains personal keys (Uncomment if needed)
+# js/config.js
+
+# System Files
+.DS_Store
+Thumbs.db
+*.log
+
+# Editor directories
+.idea/
+*.swp

@@ -1,0 +1,21 @@
+{
+    "name": "local-airspace-visualizer",
+    "version": "1.0.0",
+    "description": "A zero-cost, open-source web application that visualizes civilian aircraft flying near your location.",
+    "main": "server.js",
+    "scripts": {
+        "start": "node server.js"
+    },
+    "keywords": [
+        "aviation",
+        "tracking",
+        "visualization",
+        "opensky",
+        "leaflet"
+    ],
+    "author": "",
+    "license": "MIT",
+    "dependencies": {
+        "dotenv": "^17.2.3"
+    }
+}
